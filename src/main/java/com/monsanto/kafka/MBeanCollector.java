@@ -15,6 +15,10 @@ import java.util.regex.Pattern;
 
 import static java.lang.String.format;
 
+/**
+ * Mostly borrowed from https://github.com/prometheus/jmx_exporter/blob/master/collector/src/main/java/io/prometheus/jmx/JmxCollector.java
+ */
+
 public class MBeanCollector extends Collector implements Collector.Describable {
     static final Counter configReloadSuccess = Counter.build()
             .name("jmx_config_reload_success_total")

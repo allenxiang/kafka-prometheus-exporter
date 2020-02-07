@@ -1,9 +1,9 @@
 package com.monsanto.kafka;
 
-import fi.iki.elonen.NanoHTTPD;
 import kafka.metrics.KafkaMetricsReporter;
-import kafka.metrics.KafkaMetricsReporterMBean;
 import kafka.utils.VerifiableProperties;
+import org.eclipse.jetty.server.Server;
+import org.eclipse.jetty.servlet.ServletHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,7 +16,7 @@ public class KafkaPrometheusExporter implements KafkaMetricsReporter, KafkaProme
     private static final Logger logger = LoggerFactory.getLogger(KafkaPrometheusExporter.class);
     private boolean initialized = false;
     private boolean running = false;
-    private KafkaPrometheusExporterServer server;
+    private Server server;
 
     @Override
     public synchronized void init(VerifiableProperties props) {
@@ -25,9 +25,12 @@ public class KafkaPrometheusExporter implements KafkaMetricsReporter, KafkaProme
             String reporterConfig = props.getString("external.kafka.prometheus.config", "/etc/kafka/kafka_prometheus.yml");
 
             try {
-                MBeanCollector mbc = new MBeanCollector(new File(reporterConfig)).register();
+                new MBeanCollector(new File(reporterConfig)).register();
                 logger.info("Starting web server on port {}", port);
-                server = new KafkaPrometheusExporterServer(port);
+                server = new Server(port);
+                ServletHandler handler = new ServletHandler();
+                server.setHandler(handler);
+                handler.addServletWithMapping(MetricsServlet.class, "/metrics");
                 initialized = true;
                 startReporter(5);
             } catch (Exception ex) {
@@ -40,7 +43,7 @@ public class KafkaPrometheusExporter implements KafkaMetricsReporter, KafkaProme
     public synchronized void startReporter(long pollingPeriodInSeconds) {
         if (initialized && !running) {
             try {
-                server.start(NanoHTTPD.SOCKET_READ_TIMEOUT, true);
+                server.start();
                 running = true;
                 logger.info("Web server started");
             } catch (Exception ex) {
@@ -52,9 +55,13 @@ public class KafkaPrometheusExporter implements KafkaMetricsReporter, KafkaProme
     @Override
     public synchronized void stopReporter() {
         if (initialized && running) {
-            server.stop();
-            running = false;
-            logger.info("Stopped prometheus reporter");
+            try {
+                server.stop();
+                running = false;
+                logger.info("Stopped prometheus reporter");
+            } catch (Exception ex) {
+                logger.error("Failed to stop prometheus reporter.", ex);
+            }
         }
     }
 

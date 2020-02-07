@@ -14,6 +14,9 @@ import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Mostly borrowed from https://github.com/prometheus/jmx_exporter/blob/master/collector/src/main/java/io/prometheus/jmx/JmxScraper.java
+ */
 
 public class MBeanScraper {
     private static final Logger logger = Logger.getLogger(MBeanScraper.class.getName());;
