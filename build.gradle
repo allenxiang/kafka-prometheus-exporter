@@ -50,4 +50,6 @@ release {
     git {
         requireBranch = ''
     }
+
+    buildTasks = ['build', 'uberJar']
 }
