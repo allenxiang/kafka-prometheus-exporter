@@ -1,0 +1,55 @@
+plugins {
+    id 'java'
+    id 'idea'
+    id 'net.researchgate.release' version '2.8.1'
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(11)
+    }
+}
+
+group = 'com.bayer.edh'
+
+jar {
+    manifest {
+        attributes('Implementation-Title': 'Java Agent to export metrics from Kafka broker',
+                   'Implementation-Version': archiveVersion)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation group: 'io.prometheus', name: 'simpleclient_common', version: '0.10.0'
+    compileOnly group: 'org.eclipse.jetty', name: 'jetty-server', version: '9.4.18.v20190429'
+    compileOnly group: 'org.eclipse.jetty', name: 'jetty-servlets', version: '9.4.18.v20190429'
+    compileOnly group: 'org.eclipse.jetty', name: 'jetty-servlet', version: '9.4.18.v20190429'
+
+    implementation group: 'org.yaml', name: 'snakeyaml', version: '1.18'
+    compileOnly group: 'org.apache.kafka', name: 'kafka_2.12', version: '2.3.0'
+
+    testImplementation group: 'junit', name: 'junit', version: '4.+'
+}
+
+tasks.register('uberJar', Jar) { uberJar ->
+    archiveClassifier = 'uber'
+
+    uberJar.from sourceSets.main.output
+
+    uberJar.dependsOn configurations.runtimeClasspath
+    uberJar.from {
+        configurations.runtimeClasspath.findAll { it.name.endsWith('jar') }.collect { zipTree(it) }
+    }
+}
+
+release {
+    git {
+        requireBranch = ''
+    }
+
+    buildTasks = ['build', 'uberJar']
+}

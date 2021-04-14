@@ -1,0 +1,4 @@
+Manifest-Version: 1.0
+Implementation-Title: Java Agent to export metrics from Kafka broker
+Implementation-Version: 2.0.2
+
