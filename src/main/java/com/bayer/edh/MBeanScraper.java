@@ -1,4 +1,4 @@
-package com.monsanto.kafka;
+package com.bayer.edh;
 
 
 import javax.management.*;

@@ -1,4 +1,4 @@
-package com.monsanto.kafka;
+package com.bayer.edh;
 
 import io.prometheus.client.CollectorRegistry;
 import io.prometheus.client.exporter.common.TextFormat;

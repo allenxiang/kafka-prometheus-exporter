@@ -1,4 +1,4 @@
-package com.monsanto.kafka;
+package com.bayer.edh;
 
 
 import io.prometheus.client.Collector;
@@ -37,7 +37,7 @@ public class MBeanCollector extends Collector implements Collector.Describable {
         Double valueFactor = 1.0;
         String help;
         boolean attrNameSnakeCase;
-        Type type = Type.UNTYPED;
+        Type type = Type.UNKNOWN;
         ArrayList<String> labelNames;
         ArrayList<String> labelValues;
     }

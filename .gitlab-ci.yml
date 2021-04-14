@@ -1,0 +1,42 @@
+image:
+  name: public.ecr.aws/v3l0i1f2/datahub-gitlab-runner:openjdk11-tf0.14.7-node8.11.3
+
+stages:
+  - publish
+#  - deliver
+
+publish:
+  stage: publish
+  script:
+    - sbt universal:publish
+  only:
+    - branches
+  tags:
+    - datahub
+    - docker-runner
+
+release:
+  stage: publish
+  script:
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - cp $SSH_PRIVATE_KEY ~/.ssh/id_rsa
+    - chmod 600 ~/.ssh/id_rsa
+    - git config --global user.email "$GITLAB_USER_EMAIL"
+    - git config --global user.name "$GITLAB_USER_LOGIN"
+    - cd ..
+    - rm -fr $CI_PROJECT_NAME
+    - mkdir $CI_PROJECT_NAME
+    - cd $CI_PROJECT_NAME
+    - git init .
+    - git remote add origin git@$CI_SERVER_HOST:$CI_PROJECT_PATH.git
+    - ssh-keyscan -t rsa $CI_SERVER_HOST >> ~/.ssh/known_hosts
+    - git fetch
+    - git checkout --track origin/$CI_BUILD_REF_NAME
+    - sbt "release with-defaults"
+  when: manual
+  only:
+    - branches
+  tags:
+    - datahub
+    - docker-runner
