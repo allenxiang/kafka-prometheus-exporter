@@ -5,10 +5,13 @@ stages:
   - publish
 #  - deliver
 
+before_script:
+  - chmod +x ./gradlew
+
 publish:
   stage: publish
   script:
-    - sbt universal:publish
+    - ./gradlew build
   only:
     - branches
   tags:
@@ -33,7 +36,7 @@ release:
     - ssh-keyscan -t rsa $CI_SERVER_HOST >> ~/.ssh/known_hosts
     - git fetch
     - git checkout --track origin/$CI_BUILD_REF_NAME
-    - sbt "release with-defaults"
+    - ./gradlew build
   when: manual
   only:
     - branches
